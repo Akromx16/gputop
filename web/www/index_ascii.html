@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="GPUTOP Performance tool">
+    <meta name="author" content="The Intel Open Source Technology Center is committed to open source projects including the Linux Kernel, graphics, Android, Webkit and others.">
+    <link rel="icon" href="favicon.ico">
+    <title>GPUTOP Web Interface | Intel Open Source Technology Center</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="ascii/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="ascii/bootstrap/css/bootstrap-theme.css" rel="stylesheet">
+    <!-- <link href="ascii/bootstrap/css/docs.css" rel="stylesheet"> -->
+    <!-- <link href="ascii/assets/js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+        
+    <link href="ascii/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    
+    <!-- Custom styles for this template -->
+    <link rel="stylesheet" type="text/css" href="css/gputop.css">
+    <link rel="stylesheet" type="text/css" href="css/custom.css">
+    
+    <script src="./Long.min.js"></script>         <!-- https://raw.github.com/dcodeIO/Long.js/master/dist/Long.min.js -->
+    <script src="./ByteBufferAB.min.js"></script> <!-- https://raw.github.com/dcodeIO/ByteBuffer.js/master/dist/ByteBufferAB.min.js -->
+    <script src="./ProtoBuf.min.js"></script>     <!-- https://raw.github.com/dcodeIO/ProtoBuf.js/master/dist/ProtoBuf.min.js -->
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    <script src="./Gputop.js"></script>    
+  </head>
+
+  <body data-spy="scroll">
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+      <div class="container-fluid">        
+        <div class="navbar-header ">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+                    
+          <a class="navbar-brand" href="#"> GPUTOP </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul id="gputop-entries" class="nav navbar-nav navbar-right">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="#">Help</a></li>            
+          </ul>
+        </div>
+      </div>
+      </div>
+    </nav>
+    
+    <div class="container-fluid" >
+      <div class="row" >        
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-list">
+            <li class="active"><a href="#gputop-overview-panel" data-toggle="tab">Overview <span class="sr-only">(current)</span></a></li>         
+            <li><a href="#pane2" data-toggle="tab">Panel 2</a></li>
+            <li><a href="#log-panel" data-toggle="tab">App logs</a></li>
+          </ul>
+        </div>
+         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <div class="tab-content" id="gputop-panels">
+            <div class="tab-pane active" id="gputop-overview-panel">
+              <p>Overview main</p>
+            </div>
+            <div class="tab-pane" id="pane2">
+              <p>Pane 2</p>              
+            </div>
+            <div class="tab-pane" id="pane3">
+              <p>Pane 3</p>
+            </div>
+            <div class="tab-pane" id="pane4">
+              <p>Pane 4</p>
+            </div>
+            <div class="tab-pane" id="log-panel">
+                <h1 class="page-header">Log panel</h1>
+                <textarea id="log" class="container" style="min-height:400px" ></textarea>
+            </div>
+          </div>
+          </p>
+          </div>                             
+      </div>               
+    </div>      
+    
+    <div class="container navbar-fixed-bottom">
+        <div id = "alert_placeholder"></div>          
+    </div>
+                 
+    <!-- Bootstrap core JavaScript ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="ascii/dist/js/bootstrap.min.js"></script>
+    
+    <script src="ascii/assets/js/bootstrap-386.js"></script>
+    <script src="ascii/assets/js/bootstrap-transition.js"></script>
+    <script src="ascii/assets/js/bootstrap-alert.js"></script>
+    <script src="ascii/assets/js/bootstrap-modal.js"></script>
+    <script src="ascii/assets/js/bootstrap-dropdown.js"></script>
+    <script src="ascii/assets/js/bootstrap-scrollspy.js"></script>
+    <script src="ascii/assets/js/bootstrap-tab.js"></script>
+    <script src="ascii/assets/js/bootstrap-tooltip.js"></script>
+    <script src="ascii/assets/js/bootstrap-popover.js"></script>
+    <script src="ascii/assets/js/bootstrap-button.js"></script>
+    <script src="ascii/assets/js/bootstrap-collapse.js"></script>
+    <script src="ascii/assets/js/bootstrap-carousel.js"></script>
+    <script src="ascii/assets/js/bootstrap-typeahead.js"></script>
+    <script src="ascii/assets/js/bootstrap-affix.js"></script>
+
+    <script src="ascii/assets/js/holder/holder.js"></script>
+    <script src="ascii/assets/js/google-code-prettify/prettify.js"></script>
+
+    <script src="ascii/assets/js/application.js"></script>
+        
+    <!-- Just to make our placeholder images work. Don't actually copy the next line! 
+    <script src="assets/js/vendor/holder.min.js"></script>
+    -->
+  </body>  
+</html>
