@@ -14,9 +14,9 @@ var proto_builder = ProtoBuf.loadProtoFile("./proto/gputop.proto");
 
 function Gputop () {
     // Gputop generic configuration    
-    this.config_ = {
-        url_address: 'ws://localhost',
-        web_port: 7890        
+    this.config_ = {        
+        url_path: 'localhost',
+        uri_port: 7890        
     }        
     
     // Initialize protobuffers
@@ -26,9 +26,23 @@ function Gputop () {
     this.tabs_ = [
     'Test tab 1',
     'Test tab 2'
-    ];            
+    ];       
+                 
 }
 
+Gputop.prototype.get_server_url = function() {
+    return this.config_.url_path+':'+this.config_.uri_port;
+}
+
+Gputop.prototype.get_websocket_url = function() {
+    return 'ws://'+this.get_server_url()+'/gputop/';
+}
+
+/* Native compiled Javascript from emscripten to process the counters data */
+Gputop.prototype.get_gputop_native_js = function() {
+    return 'http://'+this.get_server_url()+'/gputop-web-v2.js';
+}
+    
 Gputop.prototype.generate_uuid = function()
 {
     /* Concise uuid generator from:
@@ -82,6 +96,25 @@ Gputop.prototype.get_socket = function(websocket_url) {
         log.value += "Connected\n";
         gputop.show_alert("Succesfully connected to GPUTOP","alert-info");
         gputop.request_features();
+                
+/*            
+        var ns = gputop.get_gputop_native_js();
+        $( "#gputop-code" ).load( ns, function() {
+            console.log( "Native load ["+ gputop.get_gputop_native_js()+ "] was performed." );
+        });
+        
+        $.ajaxSetup({
+          cache: true
+        });
+                
+        // Usage
+        $.getScript(ns , function( data, textStatus, jqxhr ) {
+            console.log( data ); // Data returned
+            console.log( textStatus ); // Success
+            console.log( jqxhr.status ); // 200
+            console.log( "Native load ["+ gputop.get_gputop_native_js()+ "] was performed." );
+        });
+*/                       
     };
     
     socket.onclose = function() {
@@ -131,7 +164,7 @@ Gputop.prototype.get_socket = function(websocket_url) {
 
 // Connect to the socket for transactions
 Gputop.prototype.connect = function() {     
-    var websocket_url = this.config_.url_address+':'+this.config_.web_port+'/gputop/';
+    var websocket_url = this.get_websocket_url();
     console.log('Connecting to port ' + websocket_url);
     //----------------- Data transactions ----------------------    
     this.socket_ = this.get_socket(websocket_url);

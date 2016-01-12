@@ -875,6 +875,7 @@ handle_get_features(h2o_websocket_conn_t *conn,
 	return;
     }
 
+
     devinfo.devid = gputop_devinfo.devid;
     devinfo.n_eus = gputop_devinfo.n_eus;
     devinfo.n_eu_slices = gputop_devinfo.n_eu_slices;

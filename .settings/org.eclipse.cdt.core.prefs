@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.toolchain.gnu.base.505675128/LLVM/delimiter=\:
+environment/project/cdt.managedbuild.toolchain.gnu.base.505675128/LLVM/operation=append
+environment/project/cdt.managedbuild.toolchain.gnu.base.505675128/LLVM/value=/home/smartinez/gfx/sources/emscripten-fastcomp/build/bin
+environment/project/cdt.managedbuild.toolchain.gnu.base.505675128/append=true
+environment/project/cdt.managedbuild.toolchain.gnu.base.505675128/appendContributed=true
