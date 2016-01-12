@@ -27,6 +27,7 @@ nobase_dist_web_DATA = \
 	index.html \
 	gputop-ui.js \
 	gputop-web-worker.js \
+	gputop-web-v2.js \
 	haswell.svg \
 	gputop-web-worker.js.map
 
@@ -38,6 +39,11 @@ EMCC_PROXY_MAKEFLAGS=-f $(srcdir)/Makefile.emscripten $(AM_MAKEFLAGS) top_srcdir
 
 gputop-web-worker.js:
 	$(MAKE) $(EMCC_PROXY_MAKEFLAGS) all
+
+EMCC_PROXY_V2_MAKEFLAGS=-f $(srcdir)/Makefile.v2.emscripten $(AM_MAKEFLAGS) top_srcdir=$(top_srcdir)
+
+gputop-web-v2.js:
+	$(MAKE) $(EMCC_PROXY_V2_MAKEFLAGS) all
 
 all-local:
 	$(MAKE) $(EMCC_PROXY_MAKEFLAGS) all
