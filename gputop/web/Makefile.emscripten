@@ -44,7 +44,7 @@ gputop-web.bc: $(gputop_web_OBJECTS)
 %.js: %.bc | dirs
 	$(CC) $(_JSFLAGS) -o $@ $^
 
-gputop-web-worker.js: gputop-web.bc gputop-web-worker-post.js gputop-web-lib.js | dirs
+gputop-web-worker.js gputop-web-worker.js.map: gputop-web.bc gputop-web-worker-post.js gputop-web-lib.js | dirs
 	$(CC) $(_JSFLAGS) --post-js $(web_srcdir)/gputop-web-worker-post.js --js-library $(web_srcdir)/gputop-web-lib.js -s BUILD_AS_WORKER=1 -s INVOKE_RUN=0 -o $@ gputop-web.bc
 
 -include .deps/*.rules

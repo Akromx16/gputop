@@ -2,6 +2,8 @@ all::
 
 E=$(if $(V),,@)
 
+CXX=em++
+
 CC=emcc
 top_srcdir=../..
 gputop_srcdir=$(top_srcdir)/gputop
@@ -21,12 +23,12 @@ OBJ_CFLAGS=$(CFLAGS)
 BC_CFLAGS=$(CFLAGS)
 JSFLAGS=-g4 -O0 -s NO_FILESYSTEM=1 -s NO_BROWSER=1 -s INVOKE_RUN=0
 
-_OBJ_CFLAGS=$(OBJ_CFLAGS) -I$(top_srcdir) -I$(gputop_srcdir) -I$(gputop_builddir) -I$(web_srcdir) -I$(protobuf_c_srcdir)
-_BC_CFLAGS=$(BC_CFLAGS) -I$(top_srcdir) -I$(gputop_srcdir) -I$(gputop_builddir) -I$(web_srcdir) -I$(protobuf_c_srcdir)
+_OBJ_CFLAGS=$(OBJ_CFLAGS) -I$(top_srcdir) -I$(gputop_srcdir) -I$(gputop_builddir) -I$(web_srcdir) 
+_BC_CFLAGS=$(BC_CFLAGS) -I$(top_srcdir) -I$(gputop_srcdir) -I$(gputop_builddir) -I$(web_srcdir) 
 _JSFLAGS=$(JSFLAGS)
 
 
-gputop_web_SOURCE=gputop-web.c gputop-string.c gputop-list.c oa-hsw.c oa-bdw.c oa-chv.c oa-skl.c gputop-web-v2.c protobuf-c.c gputop.pb-c.c gputop-oa-counters.c
+gputop_web_SOURCE=gputop-web.c gputop-string.c gputop-list.c oa-hsw.c oa-bdw.c oa-chv.c oa-skl.c gputop-web-v2.c gputop-oa-counters.c
 gputop_web_OBJECTS=$(patsubst %.c, %.o, $(gputop_web_SOURCE))
 
 all:: gputop-web-v2.bc gputop-web-v2.js
@@ -37,6 +39,10 @@ gputop-web-v2.bc: $(gputop_web_OBJECTS)
 	$(E)echo "(CC)     $(@)"
 	$(E)$(CC) $(filter %.c,$(^)) -o $@ -MMD -MF .deps/$(@).rules $(_OBJ_CFLAGS)
 
+%.o: %.cc Makefile.v2.emscripten | dirs
+	$(E)echo "(CXX)     $(@)"
+	$(E)$(CXX) $(filter %.cc,$(^)) -o $@ -MMD -MF .deps/$(@).rules $(_OBJ_CFLAGS)
+	
 %.bc: | dirs
 	$(E)echo "(BC)     $(@)"
 	$(E)$(CC) $(_BC_CFLAGS) $(filter %.o %.c,$(^)) -o $@
@@ -44,7 +50,7 @@ gputop-web-v2.bc: $(gputop_web_OBJECTS)
 %.js: %.bc | dirs
 	$(CC) $(_JSFLAGS) -o $@ $^
 
-gputop-web-v2.js: gputop-web-v2.bc gputop-web-lib-v2.js | dirs
+gputop-web-v2.js gputop-web-v2.js.map: gputop-web-v2.bc gputop-web-lib-v2.js | dirs
 	$(CC) $(_JSFLAGS) --post-js $(web_srcdir)/gputop-web-v2-post.js --js-library $(web_srcdir)/gputop-web-lib-v2.js -s BUILD_AS_WORKER=1 -s INVOKE_RUN=0 -o $@ gputop-web-v2.bc
 
 -include .deps/*.rules
