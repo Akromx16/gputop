@@ -142,6 +142,11 @@ Gputop.prototype.get_socket = function(websocket_url) {
                     if (msg.features != undefined) {
                         log.value += "Features: "+msg.features.get_cpu_model()+"\n";
                         gputop.display_features(msg.features);
+                        
+                        var di = msg.features.devinfo;                                                      
+                        _update_features(di.devid, di.n_eus,  di.n_eu_slices,
+                            di.n_eu_sub_slices, di.eu_threads_count, di.subslice_mask,
+                            di.slice_mask);
                     }                    
                     if (msg.log != undefined)         
                         log.value += "Features: "+msg.log.log_message()+"\n";                
@@ -150,8 +155,10 @@ Gputop.prototype.get_socket = function(websocket_url) {
                 case 3: /* WS_MESSAGE_I915_PERF */
                     var id = new Uint16Array(evt.data, 4, 1);       
                     
+                    Module.HEAPF64.set(new Float64Array([1,2,3]), offset/8);
+                    
                     // Included in webworker                                           
-                    //handle_i915_perf_message(id, data);
+                    _handle_i915_perf_message(id, data);
                 break;                            
             }
         } catch (err) {
