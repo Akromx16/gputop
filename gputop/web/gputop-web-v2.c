@@ -32,7 +32,6 @@
 
 #include <uuid/uuid.h>
 #include <emscripten.h>
-#include <emscripten/bind.h>
 
 #include <intel_chipset.h>
 #include <i915_oa_drm.h>
@@ -70,25 +69,6 @@ struct gputop_worker_query {
 
     gputop_list_t link;
 };
-
-/*
-EMSCRIPTEN_BINDINGS(my_value_example) {
-    value_object<gputop_worker_query>("gputop_worker_query")
-        .field("id", &gputop_worker_query::id)
-        .field("aggregation_period", &gputop_worker_query::aggregation_period)
-
-        .value_array<oa_clock>("oa_clock")
-             .element(&oa_clock::start)
-             .element(&oa_clock::timestamp)
-             .element(&oa_clock::last_raw)
-
-        .field("start_timestamp", &gputop_worker_query::start_timestamp)
-        .field("start_timestamp", &gputop_worker_query::end_timestamp)
-        ;
-
-    function("findPersonAtLocation", &findPersonAtLocation);
-}
-*/
 
 static gputop_list_t open_queries;
 
@@ -160,13 +140,7 @@ static void
 oa_clock_init(struct oa_clock *clock, uint32_t raw_start)
 {
     clock->timestamp = clock->start = (uint64_t)raw_start * 80;
-    //gputop_web_console_log("oa_clock_in       counter = &query->counters[query->n_counters++];
-    counter->oa_counter_read_float = skl__tdl_2__thread_header00_ready_port1__read;
-    counter->name = "Thread Header Ready on Slice0 Subslice0 Thread Dispatcher Port 1";
-    counter->desc = "The percentage of time in which thread header is ready on slice0 subslice0 thread dispatcher port 1";
-    counter->type = GPUTOP_PERFQUERY_COUNTER_RAW;
-    counter->data_type = GPUTOP_PERFQUERY_COUNTER_DATA_FLOAT;
-    counter->max = percentage_max_callback;it: start=%"PRIu32" timestamp=%"PRIu64, raw_start, clock->timestamp);
+    //gputop_web_console_log("oa_clock_init: start=%"PRIu32" timestamp=%"PRIu64, raw_start, clock->timestamp);
     clock->last_raw = raw_start;
 }
 
@@ -334,6 +308,7 @@ handle_oa_query_i915_perf_data(struct gputop_worker_query *query, uint8_t *data,
     const struct i915_perf_record_header *header;
     uint8_t *last;
     uint64_t end_timestamp;
+    int i = 0;
 
     if (query->continuation_report) {
 	last = query->continuation_report;
@@ -344,7 +319,7 @@ handle_oa_query_i915_perf_data(struct gputop_worker_query *query, uint8_t *data,
 	 (uint8_t *)header < (data + len);
 	 header = (void *)(((uint8_t *)header) + header->size))
     {
-#if 0
+//#if 0
 	gputop_web_console_log("header[%d] = %p size=%d type = %d", i, header, header->size, header->type);
 
 	i++;
@@ -352,7 +327,7 @@ handle_oa_query_i915_perf_data(struct gputop_worker_query *query, uint8_t *data,
 	    gputop_web_console_log("perf message too large!\n");
 	    return;
 	}
-#endif
+//#endif
 
 	switch (header->type) {
 
@@ -455,8 +430,10 @@ handle_oa_query_i915_perf_data(struct gputop_worker_query *query, uint8_t *data,
 
 static void EMSCRIPTEN_KEEPALIVE
 handle_i915_perf_message(int id, uint8_t *data, int len)
-{
+{    
     struct gputop_worker_query *query;
+    
+    printf(" %x ", data[0]);
 
     gputop_list_for_each(query, &open_queries, link) {
 
@@ -538,6 +515,7 @@ update_features(uint32_t devid, uint64_t n_eus, uint64_t n_eu_slices,
         gputop_oa_add_queries_skl(&devinfo);
     } else
         assert_not_reached();
+
 }
 
 void EMSCRIPTEN_KEEPALIVE
@@ -546,42 +524,20 @@ gputop_webworker_on_test(const char *msg, float val, const char *req_uuid)
     gputop_web_console_log("test message from ui: (%s, %f)\n", msg, val);
 }
 
-/*
 void EMSCRIPTEN_KEEPALIVE
 gputop_webworker_on_open_oa_query(uint32_t id,
 				  int perf_metric_set,
 				  int period_exponent,
 				  unsigned overwrite,
 				  uint32_t aggregation_period,
-				  unsigned live_updates,
-				  const char *req_uuid)
+				  unsigned live_updates)
 {
-    Gputop__Request req = GPUTOP__REQUEST__INIT;
-    Gputop__OpenQuery open = GPUTOP__OPEN_QUERY__INIT;
-    Gputop__OAQueryInfo oa_query = GPUTOP__OAQUERY_INFO__INIT;
     struct gputop_worker_query *query = malloc(sizeof(*query));
-
     memset(query, 0, sizeof(*query));
-
     gputop_web_console_log("on_open_oa_query set=%d, exponent=%d, overwrite=%d live=%s agg_period=%"PRIu32"\n",
 			   perf_metric_set, period_exponent, overwrite,
 			   live_updates ? "true" : "false",
 			   aggregation_period);
-
-    open.id = id;
-    open.type_case = GPUTOP__OPEN_QUERY__TYPE_OA_QUERY;
-    open.oa_query = &oa_query;
-    open.live_updates = live_updates;
-    open.overwrite = overwrite;
-
-    oa_query.metric_set = perf_metric_set;
-    oa_query.period_exponent = period_exponent;
-
-    req.uuid = (char*)req_uuid;
-    req.req_case = GPUTOP__REQUEST__REQ_OPEN_QUERY;
-    req.open_query = &open;
-
-    send_pb_message(socket, &req.base);
 
     memset(query, 0, sizeof(*query));
     query->id = id;
@@ -589,11 +545,39 @@ gputop_webworker_on_open_oa_query(uint32_t id,
     query->oa_query = &i915_perf_oa_queries[perf_metric_set];
     gputop_list_insert(open_queries.prev, &query->link);
 }
-*/
 
+void EMSCRIPTEN_KEEPALIVE
+gputop_webworker_on_close_oa_query(uint32_t id, char *req_uuid)
+{
+    struct gputop_worker_query *query;
+
+    gputop_web_console_log("on_close_oa_query(%d)\n", id);
+
+    gputop_list_for_each(query, &open_queries, link) {
+        if (query->id == id) {
+            gputop_list_remove(&query->link);
+            free(query);
+            return;
+        }
+    }
+
+    gputop_web_console_warn("webworker: requested to close unknown query ID: %d\n", id);
+}
 
 void EMSCRIPTEN_KEEPALIVE
 gputop_webworker_init(void)
 {
     gputop_list_init(&open_queries);
+}
+
+void EMSCRIPTEN_KEEPALIVE
+myloop() {
+    //gputop_web_console_log("main run\n");
+}
+
+int EMSCRIPTEN_KEEPALIVE
+main() {
+    emscripten_set_main_loop(myloop, 0, 1);
+    printf("emscripten_set_main_loop!\n");
+    return 0;
 }

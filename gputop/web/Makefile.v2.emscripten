@@ -21,7 +21,7 @@ W_FLAGS=-Wall -Wuninitialized -Wno-strict-aliasing -Wempty-body -Wformat -Wforma
 CFLAGS=-g -O0 $(W_FLAGS)
 OBJ_CFLAGS=$(CFLAGS)
 BC_CFLAGS=$(CFLAGS)
-JSFLAGS=-g4 -O0 -s NO_FILESYSTEM=1 -s NO_BROWSER=1 -s INVOKE_RUN=0
+JSFLAGS=-g4 -O0 -s NO_FILESYSTEM=1 
 
 _OBJ_CFLAGS=$(OBJ_CFLAGS) -I$(top_srcdir) -I$(gputop_srcdir) -I$(gputop_builddir) -I$(web_srcdir) 
 _BC_CFLAGS=$(BC_CFLAGS) -I$(top_srcdir) -I$(gputop_srcdir) -I$(gputop_builddir) -I$(web_srcdir) 
@@ -51,7 +51,7 @@ gputop-web-v2.bc: $(gputop_web_OBJECTS)
 	$(CC) $(_JSFLAGS) -o $@ $^
 
 gputop-web-v2.js gputop-web-v2.js.map: gputop-web-v2.bc gputop-web-lib-v2.js | dirs
-	$(CC) $(_JSFLAGS) --post-js $(web_srcdir)/gputop-web-v2-post.js --js-library $(web_srcdir)/gputop-web-lib-v2.js -s BUILD_AS_WORKER=1 -s INVOKE_RUN=0 -o $@ gputop-web-v2.bc
+	$(CC) $(_JSFLAGS) --post-js $(web_srcdir)/gputop-web-v2-post.js --js-library $(web_srcdir)/gputop-web-lib-v2.js -o $@ gputop-web-v2.bc -s NO_EXIT_RUNTIME=1 -s ASSERTIONS=0
 
 -include .deps/*.rules
 
