@@ -8,8 +8,8 @@ if (typeof dcodeIO === 'undefined' || !dcodeIO.ProtoBuf) {
 // Initialize ProtoBuf.js
 var ProtoBuf = dcodeIO.ProtoBuf;
 
-var proto_builder = ProtoBuf.loadProtoFile("./proto/gputop.proto");
-
+var proto_builder = ProtoBuf.loadProtoFile("./proto/gputop.proto");   
+    
 //------------------------------ GPUTOP ---------------------------------------------------
 
 function Gputop () {
@@ -27,7 +27,78 @@ function Gputop () {
     'Test tab 1',
     'Test tab 2'
     ];       
-                 
+           
+    // Queries
+    this.all_oa_queries_ = [];
+    this.current_oa_query = 0;
+    this.query_id_ = 0;         
+    this.query_id_next_ = 1;
+    this.query_id_current_oa_ = 0;         
+    this.query_handles_ = [];
+}
+
+Gputop.prototype.open_oa_query_for_trace = function(idx) 
+{
+    var oa_query = this.all_oa_queries_[idx];
+
+    if (typeof oa_query === 'undefined') {
+        oa_query = new this.builder_.OAQueryInfo();
+        oa_query.metric_set = 1;    /* 3D test */    
+    }
+
+    /* The timestamp for HSW+ increments every 80ns
+     *
+     * The period_exponent gives a sampling period as follows:
+     *   sample_period = 80ns * 2^(period_exponent + 1)
+     *
+     * The overflow period for Haswell can be calculated as:
+     *
+     * 2^32 / (n_eus * max_gen_freq * 2)
+     * (E.g. 40 EUs @ 1GHz = ~53ms)
+     *
+     * We currently sample ~ every 10 milliseconds...
+     */
+
+    this.query_id_ = this.query_id_next_++;
+    
+    var msg = new this.builder_.Request();
+    msg.uuid = this.generate_uuid();
+
+    var open = new this.builder_.OpenQuery();    
+                
+    oa_query.period_exponent = 16 ;    
+				                               
+    open.id = 1; //[TODO @sergioam] oa_query ID            
+    open.overwrite = false;   /* don't overwrite old samples */
+    open.live_updates = true; /* send live updates */
+                         /* nanoseconds of aggregation
+				          * i.e. request updates from the worker
+				          * as values that have been aggregated
+				          * over this duration */
+    open.oa_query = oa_query;
+
+    _gputop_webworker_on_open_oa_query(
+        this.query_id_, 
+        oa_query.metric_set,
+        oa_query.period_exponent, 
+        open.overwrite, /* don't overwrite old samples */
+		      100000000, /* nanoseconds of aggregation
+				          * i.e. request updates from the worker
+				          * as values that have been aggregated
+				          * over this duration */
+        open.live_updates /* send live updates */);
+
+
+    msg.open_query = open;    
+    msg.encode();
+    this.socket_.send(msg.toArrayBuffer());
+                      
+    log.value += "Sent: Request "+msg.uuid+"\n";
+
+    this.query_handles_.push(this.query_id);
+    
+    this.current_oa_query = oa_query;
+    this.current_oa_query_id = this.query_id_;        
 }
 
 Gputop.prototype.get_server_url = function() {
@@ -94,7 +165,7 @@ Gputop.prototype.get_socket = function(websocket_url) {
     
     socket.onopen = function() {
         log.value += "Connected\n";
-        gputop.show_alert("Succesfully connected to GPUTOP","alert-info");
+        gputop.show_alert("Succesfully connected to GPUTOP","alert-info");        
         gputop.request_features();
                 
 /*            
@@ -140,25 +211,41 @@ Gputop.prototype.get_socket = function(websocket_url) {
                 case 2: /* WS_MESSAGE_PROTOBUF */     
                     var msg = gputop.builder_.Message.decode(data);   
                     if (msg.features != undefined) {
-                        log.value += "Features: "+msg.features.get_cpu_model()+"\n";
+                        log.value += "Features: "+msg.features.get_cpu_model()+"";
                         gputop.display_features(msg.features);
+                        
+                        gputop.open_oa_query_for_trace(this.query_id);
                         
                         var di = msg.features.devinfo;                                                      
                         _update_features(di.devid, di.n_eus,  di.n_eu_slices,
                             di.n_eu_sub_slices, di.eu_threads_count, di.subslice_mask,
                             di.slice_mask);
                     }                    
-                    if (msg.log != undefined)         
-                        log.value += "Features: "+msg.log.log_message()+"\n";                
+                    if (msg.log != undefined) {                        
+                        var entries = msg.log.entries;
+                        entries.forEach(function(entry) {
+                        	var color = "red"; 
+                        	switch(entry.log_level) {
+                        		case 0: color = "orange"; break;
+                        		case 1: color = "green"; break;
+                        		case 2: color = "yellow"; break;
+                        		case 3: color = "blue"; break;
+                        		case 4: color = "black"; break;                       		
+                        	}
+                        	$('#editor').append("<font color='"+color+"'>"+entry.log_message+"<br/></font>");
+                        });
+                    }
+                                        
                                         
                 break;
                 case 3: /* WS_MESSAGE_I915_PERF */
-                    var id = new Uint16Array(evt.data, 4, 1);       
+                    var id = new Uint16Array(evt.data, 4, 1); 
+                    var dataPtr = Module._malloc(data.length);
                     
-                    Module.HEAPF64.set(new Float64Array([1,2,3]), offset/8);
-                    
-                    // Included in webworker                                           
-                    _handle_i915_perf_message(id, data);
+                    var dataHeap = new Uint8Array(Module.HEAPU8.buffer, dataPtr, data.length);
+                    dataHeap.set(data);
+
+                    _handle_i915_perf_message(id, dataHeap.byteOffset, data.length);
                 break;                            
             }
         } catch (err) {
@@ -197,5 +284,9 @@ $( document ).ready(function() {
     log = document.getElementById("log");        
     $( "#gputop-entries" ).append( '<li><a href="#">Test</a></li>' );    
     gputop.init();
-
+    $('#editor').wysiwyg();	        
 });
+
+function allReady() {
+    console.log(" All ready for emscripten ");
+}
