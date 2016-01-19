@@ -26,7 +26,7 @@ html, body {
     height: 100%;
 }
 
-.fill { 
+.fill {
     min-height: 100%;
 }
 
@@ -40,8 +40,24 @@ html, body {
     width: 80px;
 }
 
+.column_class {
+    min-height: 50px;
+}
+
+.live_trace_dropdown {
+    max-width: 1px;
+}
+
+.well {
+    width: 600px;
+    height: 200px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+
 /*
-.navbar-fixed-top {    
-    height: 80px; 
+.navbar-fixed-top {
+    height: 80px;
 }
 */

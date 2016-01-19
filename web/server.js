@@ -28,7 +28,7 @@ for (var i=0, dep, data; i<deps.length; i++) {
 
 // Initialize from .proto file
 var builder = ProtoBuf.loadProtoFile(path.join(__dirname, "www", "proto/gputop.proto")),
-   
+
 LogEntry = builder.build("gputop.LogEntry");
 
 // HTTP server
@@ -36,15 +36,15 @@ var server = http.createServer(function(req, res) {
         var file = null,
             type = "text/html";
         if (req.url == "/") {
-            file = "index.html";                    
+            file = "index.html";
         } else if (/^\/(\w+(?:\.min)?\.(?:js|html|proto))$/.test(req.url)) {
-            file = req.url.substring(1);            
-            console.log("Serving "+req.url.substring(1));            
+            file = req.url.substring(1);
+            console.log("Serving "+req.url.substring(1));
             if (/\.js$/.test(file)) {
                 type = "text/javascript";
             }
         } else {
-            file = req.url.substring(1);       
+            file = req.url.substring(1);
             //console.log("Asking "+req.url.substring(1));
             if (/\.css$/.test(file)) {
                 type = "text/css";
@@ -78,7 +78,7 @@ server.on("error", function(err) {
     console.log("Failed to start server:", err);
     process.exit(1);
 });
-    
+
 // WebSocket adapter
 var wss = new ws.Server({server: server});
 wss.on("connection", function(socket) {
@@ -90,7 +90,7 @@ wss.on("connection", function(socket) {
         if (flags.binary) {
             try {
                 // Decode the Message
-           
+
                 var msg = LogEntry.decode(data);
                 console.log("Received: "+msg.log_message);
                 // Transform the text to upper case
@@ -98,7 +98,7 @@ wss.on("connection", function(socket) {
                 // Re-encode it and send it back
                 socket.send(msg.toBuffer());
                 console.log("Test Sent: "+msg.log_message);
-                
+
             } catch (err) {
                 console.log("Processing failed:", err);
             }
