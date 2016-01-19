@@ -1,0 +1,236 @@
+<h1 class="page-header"></h1>
+
+
+<div class = "container-fluid">
+    <div class = "row">
+        <div class = "col-sm-8 tab-content" id = "counter_metrics">
+        </div>
+        <div class = "col-sm-3">
+            <ul class="tabs nav nav-pills nav-stacked" id = "sidebar_right" data-tabs="tabs">
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+var i = 0;
+var k = 1;
+
+console.log("Stopping panel 2");
+
+function timeout() {
+        //$(tab_number).find("")
+        if (gputop.is_connected_ == true)
+        {
+                i += k;
+                if (i <= 100)
+                        setTimeout(timeout, 10);
+                else if (i > 100)
+                {
+                        i = 0;
+                        setTimeout(timeout, 1000);
+                }
+        } else {
+                i = 0;
+                setTimeout(timeout, 1000);
+                console.log("Retry timeout");
+        }
+/*
+        $(id_name).find(".bar_adjust").each(function() {
+            $(this).css("width", i + "%");
+        });
+
+        $(class_name).find(".progress_text").each(function() {
+            $(this).text(i + "%");
+        });
+*/
+        $(".bar_adjust").css("width", i + "%");
+        $(".progress_text").text(i + "%");
+
+        //css("width", i + "%");
+        //$(".progress_text").text(i + "%");
+}
+
+
+$("body").append("<p1>New paragraph</p1>");
+
+
+$.get("xml/oa-skl.xml", function(d) {
+
+    var index = 0;
+    $(d).find("set").each(function() {
+        var $set = $(this);
+        var title = $set.attr("name");
+        var counter_bars;
+
+        var active = "";
+        if (index == 0)
+        {
+            active = " active";
+            $('.page-header').text(title);
+        }
+
+        // contents of the sidebar menu
+        $("#sidebar_right").append('<li class="' + active + '"><a id="set_' + index + '" href="#tab_number_' + index + '" data-toggle="tab">' + title + '</a></li>');
+
+        // display of metrics tab-pane
+        $("#counter_metrics").append('<div class = "tab-pane' + active + '" id = "tab_number_' + index + '">');
+
+        var index_counter = 0;
+        $set.find("counter").each(function() {
+
+            var $counter = $(this);
+            var name = $counter.attr("name");
+            console.log("Counter name: " + name);
+
+            // display of metrics counter bars
+            counter_bars = '<div class="row">';
+            counter_bars += '<div class = "col-sm-3"><p2 id = "counter">' + name + '</p2></div>';
+            counter_bars += '<div class = "col-sm-6">';
+            counter_bars += '<div class = "progress">';
+            counter_bars += '<div class = "progress-bar progress-bar-striped active bar_adjust" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%; transition: none;" data-toggle="tooltip" data-placement="left"></div></div></div>';
+            counter_bars += '<div class = "col-sm-1"><p class = "progress_text">' + 0 + '</p></div>';
+            counter_bars += '<div class = "col-sm-1"><a role="button" data-toggle="collapse" href="#collapse_graph_' + index + '_' + index_counter + '" aria-expanded="false" aria-controls="collapseExample"><div class = "glyphicon glyphicon-collapse-down"></div></a></div></div>';
+
+            counter_bars += '<div class = "row"> \
+                    <div class = "col-sm-9"> \
+                    <div class="collapse" id="collapse_graph_' + index + '_' + index_counter + '"><div class="well" id="flotcontainer_' + index + '_' + index_counter + '"></div></div></div></div>';
+
+            // title of the Metrics Set
+            $("#tab_number_" + index).append(counter_bars);
+            index_counter ++;
+        });
+
+        $("#counter_metrics").append("</div");
+        index ++;
+    })
+
+
+$('#sidebar_right a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+  e.target // newly activated tab
+  e.relatedTarget // previous active tab
+  //timeout(e.target.href);
+  $('.page-header').text(e.target.text);
+  //alert("Hello");
+});
+
+
+$('#collapse_button').on('click', function() {
+    $('.page-header').text('Adi');
+});
+
+$('.collapse').on('shown.bs.collapse', function(e) {
+    var id = $(e.target).find(".well");
+    graph_start("#" + id.attr("id"));
+});
+        //graph_start("#flotcontainer_0_0");
+
+
+
+});
+
+</script>
+
+<!-- CSS -->
+<style type="text/css">
+.well {
+    width: 600px;
+    height: 200px;
+    text-align: center;
+    margin: 0 auto;
+}
+</style>
+
+<!-- Javascript -->
+<script>
+var data = [];
+var dataset;
+var totalPoints = 50;
+var updateInterval = 500;
+var now = new Date().getTime();
+
+
+function GetData() {
+    data.shift();
+
+    while (data.length < totalPoints) {
+        var y = Math.random() * 100;
+        var temp = [now += updateInterval, y];
+
+        data.push(temp);
+    }
+}
+
+var options = {
+    series: {
+        lines: {
+            show: true,
+            lineWidth: 1.2,
+            fill: true
+        }
+    },
+    xaxis: {
+        mode: "time",
+        tickSize: [2, "second"],
+        tickFormatter: function (v, axis) {
+            var date = new Date(v);
+
+            if (date.getSeconds() % 20 == 0) {
+                var hours = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+                var minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+                var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+
+                return hours + ":" + minutes + ":" + seconds;
+            } else {
+                return "";
+            }
+        },
+        axisLabel: "Time",
+        axisLabelUseCanvas: true,
+        axisLabelFontSizePixels: 12,
+        axisLabelFontFamily: 'Verdana, Arial',
+        axisLabelPadding: 10
+    },
+    yaxis: {
+        min: 0,
+        max: 100,
+        tickSize: 5,
+        tickFormatter: function (v, axis) {
+            if (v % 10 == 0) {
+                return v + "%";
+            } else {
+                return "";
+            }
+        },
+        axisLabel: "CPU loading",
+        axisLabelUseCanvas: true,
+        axisLabelFontSizePixels: 12,
+        axisLabelFontFamily: 'Verdana, Arial',
+        axisLabelPadding: 6
+    },
+    legend: {
+        labelBoxBorderColor: "#fff"
+    }
+};
+
+
+function graph_start(id_plot) {
+    GetData();
+
+    dataset = [
+        { label: "CPU", data: data }
+    ];
+
+    $.plot($(id_plot), dataset, options);
+
+    function update() {
+        GetData();
+
+        $.plot($(id_plot), dataset, options)
+        setTimeout(update, updateInterval);
+    }
+
+    update();
+};
+
+</script>

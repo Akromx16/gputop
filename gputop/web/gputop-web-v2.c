@@ -156,16 +156,16 @@ oa_clock_accumulate_raw(struct oa_clock *clock, uint32_t raw_timestamp)
     uint32_t delta = raw_timestamp - clock->last_raw;
     uint64_t elapsed;
 
-    gputop_web_console_log("oa_clock_accumulate_raw: raw=%"PRIu32" last = %"PRIu32" delta = %"PRIu32,
-                            raw_timestamp, clock->last_raw, delta);
-    gputop_web_console_assert(((uint64_t)delta * 80) < 3000000000UL, "Huge timer jump foo");
+    //gputop_web_console_log("oa_clock_accumulate_raw: raw=%"PRIu32" last = %"PRIu32" delta = %"PRIu32,
+    //                        raw_timestamp, clock->last_raw, delta);
+    //gputop_web_console_assert(((uint64_t)delta * 80) < 3000000000UL, "Huge timer jump foo");
 
     clock->timestamp += (uint64_t)delta * 80;
     clock->last_raw = raw_timestamp;
-    gputop_web_console_log("oa_clock_accumulate_raw: clock->last_raw=%"PRIu32, clock->last_raw);
+    //gputop_web_console_log("oa_clock_accumulate_raw: clock->last_raw=%"PRIu32, clock->last_raw);
 
     elapsed = clock->timestamp - clock->start;
-    gputop_web_console_log("oa_clock_accumulate_raw: elapsed=%"PRIu64, elapsed);
+    //gputop_web_console_log("oa_clock_accumulate_raw: elapsed=%"PRIu64, elapsed);
 }
 
 uint32_t
@@ -429,9 +429,9 @@ handle_oa_query_i915_perf_data(struct gputop_worker_query *query, uint8_t *data,
 
 static void EMSCRIPTEN_KEEPALIVE
 handle_i915_perf_message(int id, uint8_t *data, int len)
-{    
+{
     struct gputop_worker_query *query;
-    
+
     printf(" %x ", data[0]);
 
     gputop_list_for_each(query, &open_queries, link) {
