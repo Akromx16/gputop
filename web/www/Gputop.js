@@ -37,6 +37,10 @@ function Gputop () {
     this.query_handles_ = [];
 }
 
+Gputop.prototype.load_oa_queries = function(architecture) {
+    console.log(" Loading "+architecture);
+}
+
 Gputop.prototype.open_oa_query_for_trace = function(idx) 
 {
     var oa_query = this.all_oa_queries_[idx];
@@ -240,12 +244,11 @@ Gputop.prototype.get_socket = function(websocket_url) {
                 break;
                 case 3: /* WS_MESSAGE_I915_PERF */
                     var id = new Uint16Array(evt.data, 4, 1); 
-                    var dataPtr = Module._malloc(data.length);
-                    
+                    var dataPtr = Module._malloc(data.length);                    
                     var dataHeap = new Uint8Array(Module.HEAPU8.buffer, dataPtr, data.length);
                     dataHeap.set(data);
-
-                    _handle_i915_perf_message(id, dataHeap.byteOffset, data.length);
+                    _handle_i915_perf_message(id, dataHeap.byteOffset, data.length);                    
+                    Module._free(dataHeap.byteOffset);
                 break;                            
             }
         } catch (err) {
