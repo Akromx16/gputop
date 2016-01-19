@@ -154,18 +154,18 @@ static void
 oa_clock_accumulate_raw(struct oa_clock *clock, uint32_t raw_timestamp)
 {
     uint32_t delta = raw_timestamp - clock->last_raw;
-    //uint64_t elapsed;
+    uint64_t elapsed;
 
-    //gputop_web_console_log("oa_clock_accumulate_raw: raw=%"PRIu32" last = %"PRIu32" delta = %"PRIu32,
-	//		   raw_timestamp, clock->last_raw, delta);
-    //gputop_web_console_assert(((uint64_t)delta * 80) < 3000000000UL, "Huge timer jump foo");
+    gputop_web_console_log("oa_clock_accumulate_raw: raw=%"PRIu32" last = %"PRIu32" delta = %"PRIu32,
+                            raw_timestamp, clock->last_raw, delta);
+    gputop_web_console_assert(((uint64_t)delta * 80) < 3000000000UL, "Huge timer jump foo");
 
     clock->timestamp += (uint64_t)delta * 80;
     clock->last_raw = raw_timestamp;
-    //gputop_web_console_log("oa_clock_accumulate_raw: clock->last_raw=%"PRIu32, clock->last_raw);
+    gputop_web_console_log("oa_clock_accumulate_raw: clock->last_raw=%"PRIu32, clock->last_raw);
 
-    //elapsed = clock->timestamp - clock->start;
-    //gputop_web_console_log("oa_clock_accumulate_raw: elapsed=%"PRIu64, elapsed);
+    elapsed = clock->timestamp - clock->start;
+    gputop_web_console_log("oa_clock_accumulate_raw: elapsed=%"PRIu64, elapsed);
 }
 
 uint32_t
@@ -224,13 +224,12 @@ append_raw_oa_counter(gputop_string_t *str,
 static void
 forward_query_update(struct gputop_worker_query *query)
 {
-    /*
     struct gputop_perf_query *oa_query = query->oa_query;
     uint64_t delta;
     int i;
 
-    //if (query->start_timestamp == 0)
-	//gputop_web_console_warn("WW: Zero timestamp");
+    if (query->start_timestamp == 0)
+	gputop_web_console_warn("WW: Zero timestamp");
 
     gputop_string_t *str = gputop_string_new("{ \"method\": \"oa_query_update\", ");
     gputop_string_append_printf(str,
@@ -265,9 +264,9 @@ forward_query_update(struct gputop_worker_query *query)
 
     gputop_string_append_printf(str, "] } ], \"id\": %u }\n", next_rpc_id++);
 
-    _gputop_web_worker_post(str->str);
+    //_gputop_web_worker_post(str->str);
     gputop_string_free(str, true);
-    */
+
 }
 
 static void
@@ -319,7 +318,7 @@ handle_oa_query_i915_perf_data(struct gputop_worker_query *query, uint8_t *data,
 	 (uint8_t *)header < (data + len);
 	 header = (void *)(((uint8_t *)header) + header->size))
     {
-//#if 0
+#if 0
 	gputop_web_console_log("header[%d] = %p size=%d type = %d", i, header, header->size, header->type);
 
 	i++;
@@ -327,7 +326,7 @@ handle_oa_query_i915_perf_data(struct gputop_worker_query *query, uint8_t *data,
 	    gputop_web_console_log("perf message too large!\n");
 	    return;
 	}
-//#endif
+#endif
 
 	switch (header->type) {
 
@@ -503,15 +502,19 @@ update_features(uint32_t devid, uint64_t n_eus, uint64_t n_eu_slices,
 
     if (IS_HASWELL(devid)) {
         _gputop_web_console_log("Adding Haswell queries\n");
+        emscripten_run_script("gputop.load_oa_queries('hsw');");
         gputop_oa_add_queries_hsw(&devinfo);
     } else if (IS_BROADWELL(devid)) {
         _gputop_web_console_log("Adding Broadwell queries\n");
+        emscripten_run_script("gputop.load_oa_queries('bdw');");
         gputop_oa_add_queries_bdw(&devinfo);
     } else if (IS_CHERRYVIEW(devid)) {
         _gputop_web_console_log("Adding Cherryview queries\n");
         gputop_oa_add_queries_chv(&devinfo);
+        emscripten_run_script("gputop.load_oa_queries('chv');");
     } else if (IS_SKYLAKE(devid)) {
         _gputop_web_console_log("Adding Skylake queries\n");
+        emscripten_run_script("gputop.load_oa_queries('skl');");
         gputop_oa_add_queries_skl(&devinfo);
     } else
         assert_not_reached();
@@ -575,7 +578,7 @@ myloop() {
     //gputop_web_console_log("main run\n");
 }
 
-int EMSCRIPTEN_KEEPALIVE
+int
 main() {
     emscripten_set_main_loop(myloop, 0, 1);
     printf("emscripten_set_main_loop!\n");
