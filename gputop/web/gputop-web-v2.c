@@ -244,11 +244,15 @@ forward_query_update(struct gputop_worker_query *query)
     //printf("start ts = %"PRIu64" end ts = %"PRIu64" delta = %"PRIu64" agg. period =%"PRIu64"\n",
 	//   start_timestamp, end_timestamp, delta, query->aggregation_period);
 
+    //_gputop_query_update_begin(query->id, query->start_timestamp, query->end_timestamp, delta);
+
     for (i = 0; i < oa_query->n_counters; i++) {
 	struct gputop_perf_query_counter *counter = &oa_query->counters[i];
 
 	gputop_string_append(str, "  [ ");
 	append_raw_oa_counter(str, oa_query, counter);
+
+        //_gputop_query_update_counter(query->id, query->start_timestamp, query->end_timestamp, delta);
 
 	if (counter->max) {
 	    uint64_t max = counter->max(&devinfo, oa_query, oa_query->accumulator);
@@ -263,6 +267,9 @@ forward_query_update(struct gputop_worker_query *query)
     }
 
     gputop_string_append_printf(str, "] } ], \"id\": %u }\n", next_rpc_id++);
+
+    //_gputop_query_update_end(next_rpc_id);
+
 
     //_gputop_web_worker_post(str->str);
     gputop_string_free(str, true);
