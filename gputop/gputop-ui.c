@@ -1345,8 +1345,6 @@ gputop_ui_run(void *arg)
 
     uv_run(gputop_ui_loop, UV_RUN_DEFAULT);
 
-    gputop_perf_free();
-
     gputop_list_for_each_safe(tab, tmp, &tabs, link) {
         free (tab);
     }

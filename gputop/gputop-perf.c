@@ -1438,8 +1438,8 @@ free_perf_oa_queries(struct gputop_hash_entry *entry)
 void
 gputop_perf_free(void)
 {
-    gputop_hash_table_destroy(queries, free_perf_oa_queries);
-    array_free(perf_oa_supported_query_guids);
+    //gputop_hash_table_destroy(queries, free_perf_oa_queries);
+    //array_free(perf_oa_supported_query_guids);
 }
 
 /**
