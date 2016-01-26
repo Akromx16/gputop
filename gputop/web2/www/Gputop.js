@@ -21,7 +21,7 @@ var proto_builder = ProtoBuf.loadProtoFile("./proto/gputop.proto");
 
 //------------------------------ METRIC ---------------------------------------------------
 function Counter () {
-    this.idx_ = -1;    
+    this.idx_ = -1;
     this.emscripten_idx_ = -1;
     this.available_ = false;
     this.xml_ = "<xml/>";
@@ -43,7 +43,7 @@ Metric.prototype.print = function() {
 //------------------------------ GPUTOP ---------------------------------------------------
 function Gputop () {
     this.map_metrics_ = {};
-   
+
     this.is_connected_ = false;
     // Gputop generic configuration
     this.config_ = {
@@ -55,7 +55,7 @@ function Gputop () {
     // Initialize protobuffers
     this.builder_ = proto_builder.build("gputop");
 
-    // Queries    
+    // Queries
     this.query_id_next_ = 1;
     this.query_handles_ = [];
     this.active_metric_query_ = 0;
@@ -66,12 +66,12 @@ Gputop.prototype.get_metrics_xml = function() {
 }
 
 Gputop.prototype.get_map_metric = function(guid){
-    var metric;    
+    var metric;
     if (guid in this.map_metrics_) {
         metric = this.map_metrics_[guid];
     } else {
         metric = new Metric();
-        metric.guid_ = guid;        
+        metric.guid_ = guid;
         metric.metric_set_ = Object.keys(this.map_metrics_).length;
         this.map_metrics_[guid] = metric;
     }
@@ -79,16 +79,16 @@ Gputop.prototype.get_map_metric = function(guid){
 }
 
 function gputop_read_metrics_set() {
-    try { 
+    try {
         var $set = $(this);
         var title = $set.attr("name");
         var guid = $set.attr("guid");
-    
+
         gputop_ui.syslog('Found metric ' + title);
-    
-        var metric = gputop.get_map_metric(guid);    
+
+        var metric = gputop.get_map_metric(guid);
         metric.xml_ = $set;
-        metric.print();  
+        metric.print();
         gputop.map_metrics_[guid] = metric;
     } catch (e) {
         gputop_ui.syslog("Catch parsing " + e);
@@ -108,7 +108,7 @@ Gputop.prototype.load_xml_metrics = function(xml) {
     });
 }
 
-Gputop.prototype.load_oa_queries = function(architecture) {    
+Gputop.prototype.load_oa_queries = function(architecture) {
     console.log("Loading " + architecture);
     this.config_.architecture = architecture;
 
@@ -122,19 +122,19 @@ Gputop.prototype.open_oa_query_for_trace = function(guid) {
         gputop_ui.show_alert("GUID missing while trying to opening query","alert-danger");
         return;
     }
-    
+
     gputop_ui.syslog("Launch query GUID " + guid);
     var metric = this.get_map_metric(guid);
 
     if (metric.supported_ == false) {
-        gputop_ui.show_alert("Metric "+guid+" not supported","alert-danger");        
+        gputop_ui.show_alert("Metric "+guid+" not supported","alert-danger");
         return;
     }
-        
+
     var oa_query = new this.builder_.OAQueryInfo();
     oa_query.guid = guid;
-    oa_query.metric_set = metric.metric_set_;    /* 3D test */    
-    
+    oa_query.metric_set = metric.metric_set_;    /* 3D test */
+
     /* The timestamp for HSW+ increments every 80ns
      *
      * The period_exponent gives a sampling period as follows:
@@ -186,7 +186,7 @@ Gputop.prototype.open_oa_query_for_trace = function(guid) {
     gputop_ui.syslog("Sent: Request "+msg.uuid);
 
     this.query_handles_.push(metric.oa_query_id_);
-    this.active_metric_query_ = metric;    
+    this.active_metric_query_ = metric;
 }
 
 Gputop.prototype.get_server_url = function() {
@@ -228,9 +228,9 @@ Gputop.prototype.request_features = function() {
     }
 }
 
-Gputop.prototype.metric_supported = function(element, index, array){    
+Gputop.prototype.metric_supported = function(element, index, array){
     var metric = gputop.get_map_metric(element);
-    metric.supported_ = true; 
+    metric.supported_ = true;
     metric.print();
 }
 
@@ -239,7 +239,7 @@ Gputop.prototype.process_features = function(features){
 
     features.supported_oa_query_guids.forEach(this.metric_supported);
 
-    var di = features.devinfo;   
+    var di = features.devinfo;
     _update_features(di.devid, di.n_eus,  di.n_eu_slices,
         di.n_eu_sub_slices, di.eu_threads_count, di.subslice_mask,
         di.slice_mask);
@@ -257,12 +257,12 @@ Gputop.prototype.get_socket = function(websocket_url) {
     };
 
     socket.onclose = function() {
-        gputop_ui.syslog("Disconnected");                       
+        gputop_ui.syslog("Disconnected");
         gputop_ui.show_alert("Failed connecting to GPUTOP <p\>Retry in 5 seconds","alert-danger");
         setTimeout(function() { // this will automatically close the alert and remove this if the users doesnt close it in 5 secs
             gputop.connect();
         }, 5000);
-        
+
         gputop.is_connected_ = false;
     };
 
@@ -302,7 +302,7 @@ Gputop.prototype.get_socket = function(websocket_url) {
             }
         } catch (err) {
             console.log("Error: "+err);
-            log.value += "Error: "+err+"\n";            
+            log.value += "Error: "+err+"\n";
         }
     };
 
