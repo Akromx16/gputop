@@ -157,6 +157,7 @@ function trace_ui_redraw(timestamp)
 
 	for (var j = 0; j < n_updates; j++) {
 	    var update = trace_ui_updates[j];
+            //counter = update.counters[i];
 	    var start = update.gpu_start;
 	    var end = update.gpu_end;
 
