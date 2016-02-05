@@ -27,9 +27,9 @@ function Gputop_ui () {
         },
         xaxis: {
             show: true,
-            ticks: 5
-            //min: 0,
-            //max: 1000
+            //ticks: 5,
+            min: 0,
+            max: 1000
         },
         yaxis: {
             min: 0,
@@ -56,12 +56,12 @@ Gputop_ui.prototype.display_graph = function(timestamp) {
         var container = "#" + this.graph_array[i];
         var counter = $(container).data();
 
-        var length = counter.graph_data_.length;
+        var length = counter.updates.length;
         var x_min = 0;
         var x_max = 1;
         if (!counter.start_timestamp) {
             counter.start_timestamp = timestamp;
-            counter.start_gpu_timestamp = counter.graph_data_[length - 1][0]; // start_timestamp
+            counter.start_gpu_timestamp = counter.updates[length - 1][1]; // end_timestamp
         }
 
         var elapsed = timestamp - counter.start_timestamp;
@@ -69,41 +69,60 @@ Gputop_ui.prototype.display_graph = function(timestamp) {
         //console.warn("timestamp: " + elapsed * 1000000 + "   gputime: " +  counter.start_gpu_timestamp);
         x_min = x_max - 10000000000; // 5 seconds
 
-        // delete old updates
+        length = counter.updates.length; // update the length after removing samples
+/*
         for (var j = 0; j < length; j++) {
-            var end = counter.graph_data_[j][1]; // end_timestamp
+            var end = counter.updates[j][1]; // end_timestamp
             if (end >= x_min)
                 break;
         }
 
-        if (j > 0)
-            counter.graph_data_.splice(0, j);
-
-        length = counter.graph_data_.length; // update the length after removing samples
-
+        var index_updates = j > 0 ? j - 1 : 0;
+*/
         // discard samples from the graph_display_data
-        for (var j = 0; j < counter.graph_display_data_.length &&
-            counter.graph_display_data_[j][0] < x_min; j++) {} // start_timestamp
+        
+        for (var j = 0; j < counter.graph_data.length &&
+            counter.graph_data[j][0] < x_min / 100000; j++) {
+                //console.log(j + " " + counter.graph_data[j][0] + "  " +  x_min / 100000);
+            }
+        //console.log("-----");
 
-        counter.graph_display_data_ = counter.graph_display_data_.slice(j);
+        if (j > 0)
+            j = j - 1;
+        counter.graph_data = counter.graph_data.slice(j);
 
+        var save_index = 0;
         for (var j = 0; j < length; j++) {
-            var start = counter.graph_data_[j][0];
-            var end = counter.graph_data_[j][1];
-            if (start > x_max)
-                break;
-            if (start < x_min || start === end || end < start || start === 0 || end === 0) {
+            var start = counter.updates[j][0];
+            var end = counter.updates[j][1];
+            //if (start > x_max)
+                //break;
+            /*if (start < x_min || start === end || end < start || start === 0 || end === 0) {
                 //console.warn("Spurious update timestamps: start=" + start + ", end=" + end);
                 continue;
             }
-
-            var val = counter.graph_data_[j][2]; // value
-            counter.graph_display_data_.push([start / 100000, val]);
+*/
+            var val = counter.updates[j][2]; // value
+            counter.graph_data.push([start / 100000, val]);
+            save_index = j;
         }
 
-
-        this.series[0].data = counter.graph_display_data_;
+        this.graph_options.xaxis.min = (x_min - 1000000000) / 100000;
+        this.graph_options.xaxis.max = (x_max - 1000000000) / 100000;
+        this.series[0].data = counter.graph_data;
         $.plot(container, this.series, this.graph_options);
+        
+        /*
+        // delete old updates
+        for (var j = 0; j < length; j++) {
+            var end = counter.updates[j][1]; // end_timestamp
+            if (end >= x_min)
+                break;
+        }
+        //save_index -= j;
+        if (j > 0)*/
+        //counter.updates.splice(0, save_index + 1); // avoid splicing
+        counter.updates.splice(0, counter.updates.length);
     }
 }
 

@@ -33,10 +33,11 @@ function Counter () {
 
     this.samples_ = 0; // Number of samples processed
     this.data_ = [];
-    this.graph_data_ = [];
-    this.graph_display_data_ = [];
+    this.updates = [];
+    this.graph_data = [];
     this.start_timestamp = null;
     this.start_gpu_timestamp = 0;
+    this.updates_index = 0;
 }
 
 Counter.prototype.append_counter_data = function (start_timestamp, end_timestamp, delta, d_value, max) {
@@ -46,17 +47,17 @@ Counter.prototype.append_counter_data = function (start_timestamp, end_timestamp
         var current_delta = 0;
         var value = 100 * d_value / max;
 
-        if (this.graph_data_.length != 0)
-            current_delta = this.graph_data_[this.graph_data_.length - 1][0]; // delta is the last element
+        if (this.updates.length != 0)
+            current_delta = this.updates[this.updates.length - 1][0]; // delta is the last element
 
         current_delta += delta / 1000000;
 
-        this.graph_data_.push([start_timestamp, end_timestamp, value]);
+        this.updates.push([start_timestamp, end_timestamp, value]);
         //console.log(this.graph_data_.length);
 
-        if (this.graph_data_.length > 1000) {
-            this.graph_data_.shift();
-        }
+        /*if (this.updates.length > 1000) {
+            this.updates.shift();
+        }*/
     }
     this.samples_ ++;
     var n_samples = this.data_.length/3;
