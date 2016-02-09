@@ -34,6 +34,10 @@ env:
     - CONFIG_OPTS="--disable-debug --disable-gl --enable-webui"
 
 before_install:
+    - export PATH=$TRAVIS_BUILD_DIR/install/bin:$PATH
+    - export PATH="$TRAVIS_BUILD_DIR/emscripten:$PATH"
+    - export LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/install/lib:$LD_LIBRARY_PATH
+    - export PKG_CONFIG_PATH=$TRAVIS_BUILD_DIR/install/lib/pkgconfig:$PKG_CONFIG_PATH
     # We don't want to depend on a special version of gcc for building gputop but building
     # llvm-fastcomp depends on a more recent toolchain :-/
     - export CC=gcc-4.9 CXX=g++-4.9
@@ -57,7 +61,6 @@ before_install:
        fi)
     - export LLVM="$TRAVIS_BUILD_DIR/llvm-fastcomp/bin"
     - git clone --single-branch --branch master --depth 1 https://github.com/kripken/emscripten
-    - export PATH="$TRAVIS_BUILD_DIR/emscripten:$PATH"
     - emcc -v
     # Try not to depend on a special version of gcc/clang for anything else...
     - export CC=gcc CXX=g++
@@ -77,4 +80,11 @@ before_script:
     - NOCONFIGURE=1 ./autogen.sh
 
 script:
-    - ./configure $CONFIG_OPTS && make
+    - export GPUTOP_TRAVIS_MODE=1
+    - ./configure $CONFIG_OPTS && make && make install
+    - cat ~/.emscripten
+    - ls /home/travis/build/rib/gputop
+    - ls /home/travis/build/rib/gputop/llvm-fastcomp
+    - ls /home/travis/build/rib/gputop/llvm-fastcomp/bin
+    - cd $TRAVIS_BUILD_DIR/install/bin
+    - ./gputop --fake ./gputop-system
