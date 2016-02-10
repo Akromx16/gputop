@@ -136,12 +136,28 @@ AC_ARG_ENABLE(
   [enable_gl="$enableval"],
   [enable_gl="$have_glx"]
 )
+
 AS_IF([test "$enable_gl" = "yes"],
       [
 	PKG_CHECK_MODULES(GLX_DEP, [gl x11])
 	AC_DEFINE([SUPPORT_GL], [1], [Support intercepting GL applications])
       ])
 AM_CONDITIONAL(SUPPORT_GL, [test "$enable_gl" = "yes" ])
+
+
+AC_ARG_ENABLE(
+  [travis],
+  [AC_HELP_STRING([--enable-travis=@<:@no/yes@:>@],
+                  [Enable support for travis build, works only with --disable-gl @<:@default=disabled@:>@])],
+  [enable_travis="$enableval"
+   enable_gl="no"],
+  [enable_travis="no"]
+)
+
+AS_IF([test "$enable_travis" = "yes"],
+      [
+	AC_DEFINE([SUPPORT_TRAVIS], [1], [Support travis build])
+      ])
 
 dnl ================================================================
 dnl Misc program dependencies.
@@ -193,6 +209,8 @@ echo ""
 echo " • Optional Features: ${FEATURES}"
 echo "        GL Intercept: ${enable_gl}"
 echo "              Web UI: ${enable_webui}"
+echo "              Travis: ${enable_travis}"
+echo "             can_travis: ${can_travis}"
 echo ""
 
 echo " • Compiler options:"

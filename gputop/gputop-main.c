@@ -152,6 +152,11 @@ print_gputop_env_vars(void)
     if (getenv("GPUTOP_FAKE_MODE"))
         fprintf(stderr, "GPUTOP_FAKE_MODE=%s \\\n", getenv("GPUTOP_FAKE_MODE"));
 
+#ifdef SUPPORT_TRAVIS
+    if (getenv("GPUTOP_TRAVIS_TIMER"))
+        fprintf(stderr, "GPUTOP_TRAVIS_TIMER=%s \\\n", getenv("GPUTOP_TRAVIS_TIMER"));
+#endif
+
 #ifdef SUPPORT_GL
     if (getenv("GPUTOP_GL_LIBRARY"))
         fprintf(stderr, "GPUTOP_GL_LIBRARY=%s \\\n", getenv("GPUTOP_GL_LIBRARY"));
@@ -216,6 +221,9 @@ main (int argc, char **argv)
     int err;
     int i;
 
+#ifdef SUPPORT_TRAVIS
+    setenv("GPUTOP_TRAVIS_TIMER", "1", true);
+#endif
 
     while ((opt = getopt_long(argc, argv, short_options, long_options, NULL))
 	   != -1)
