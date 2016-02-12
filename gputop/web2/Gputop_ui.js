@@ -53,7 +53,7 @@ function Gputop_ui () {
 }
 
 Gputop_ui.prototype.update_slider_period = function(period_) {
-    $( '#speed_slider' ).slider('setValue', period_);
+    slider.setValue(period_);
 }
 
 Gputop_ui.prototype.display_graph = function(timestamp) {
