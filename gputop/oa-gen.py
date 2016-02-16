@@ -28,6 +28,38 @@ import sys
 symbol_to_perf_map = { 'RenderBasic' : '3D',
                        'ComputeBasic' : 'COMPUTE' }
 
+class Node:
+    def __init__(self, val):
+            self.left = None
+            self.right = None
+            self.value = val
+
+class Tree:
+    def __init__(self):
+        self.root = None
+        self.right = None
+
+    def getRoot(self):
+        return self.root
+
+    def add_right(self, val):
+        self.right = Node(val)
+
+    def add_root(self, val):
+        a_node = Node(val)
+        a_node.left = self.root
+        self.root = a_node
+        (self.root).right = self.right
+
+    def pre_order(self, node):
+        if (node != None):
+            print(node.value) + ' '
+            self.pre_order(node.left)
+            self.pre_order(node.right)
+
+print("\n-----------------------------------------\nSalut")
+
+
 def print_err(*args):
     sys.stderr.write(' '.join(map(str,args)) + '\n')
 
@@ -180,15 +212,26 @@ def output_rpn_equation_code(set, counter, equation, counter_vars):
     stack = []
     tmp_id = 0
     tmp = None
+    tree = Tree()
+    node_no = 0
+    prev_token = ""
 
     for token in tokens:
         stack.append(token)
+        if (token != "READ") and (prev_token != "A") and (prev_token != "B") and (prev_token != "C"):
+            node_no = node_no + 1
+            if (node_no % 2 == 1):
+                tree.add_root(token)
+            else:
+                tree.add_right(token)
+        prev_token = token;
         while stack and stack[-1] in ops:
             op = stack.pop()
             argc, callback = ops[op]
             args = []
             for i in range(0, argc):
                 operand = stack.pop()
+
                 if operand[0] == "$":
                     if operand in hw_vars:
                         operand = hw_vars[operand]
@@ -203,6 +246,11 @@ def output_rpn_equation_code(set, counter, equation, counter_vars):
 
             tmp = "tmp" + str(tmp_id - 1)
             stack.append(tmp)
+
+    #print (tree.getRoot()).value
+
+    tree.pre_order(tree.getRoot())
+    print ("\n\n---------------------------------\n\n")
 
     if len(stack) != 1:
         raise Exception("Spurious empty rpn code for " + set.get('name') + " :: " +
