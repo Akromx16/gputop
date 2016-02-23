@@ -76,6 +76,7 @@ libgputop_la_LIBADD = \
 
 oa_xml_files = \
     oa-hsw.xml \
+    hsw.xml \
     oa-bdw.xml \
     oa-chv.xml \
     oa-skl.xml
@@ -162,7 +163,8 @@ oa-hsw.h oa-hsw.c: oa-hsw.xml oa-gen.py
 	$(PYTHON2) $(PYTHON_FLAGS) $(srcdir)/oa-gen.py \
 	    --header=$(builddir)/oa-hsw.h \
 	    --code=$(builddir)/oa-hsw.c \
-	    --chipset="hsw" $(srcdir)/oa-hsw.xml
+	    --chipset="hsw" $(srcdir)/oa-hsw.xml \
+	    --xml_eq="hsw.xml"
 
 oa-bdw.h oa-bdw.c: oa-bdw.xml oa-gen.py
 	$(PYTHON2) $(PYTHON_FLAGS) $(srcdir)/oa-gen.py \
